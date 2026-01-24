@@ -143,55 +143,24 @@ fn main() {
 
 ## TypeScript Integration
 
-Here's how to use this library from TypeScript:
+Here's how to use this library from TypeScript (Using OpenCore Framework):
 
 ```typescript
-import { spawn } from 'child_process';
-import { randomUUID } from 'crypto';
+import { Server } from '@open-core/framework/server'
 
-class RustRPCClient {
-  private process: any;
-  private pending = new Map<string, any>();
+@Server.BinaryService({
+  name: 'math',
+  binary: 'math',
+  timeoutMs: 2000,
+})
+export class MathBinaryService {
 
-  constructor(binaryPath: string) {
-    this.process = spawn(binaryPath);
-    
-    this.process.stdout.on('data', (data: Buffer) => {
-      const lines = data.toString().split('\n').filter(l => l.trim());
-      for (const line of lines) {
-        const response = JSON.parse(line);
-        const resolver = this.pending.get(response.id);
-        if (resolver) {
-          this.pending.delete(response.id);
-          if (response.status === 'ok') {
-            resolver.resolve(response.result);
-          } else {
-            resolver.reject(new Error(response.error));
-          }
-        }
-      }
-    });
-  }
-
-  async call(action: string, params: any[]): Promise<any> {
-    const id = randomUUID();
-    const request = { id, action, params };
-    
-    return new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
-      this.process.stdin.write(JSON.stringify(request) + '\n');
-    });
-  }
-
-  close() {
-    this.process.kill();
+  @Server.BinaryCall({ action: 'sum' })
+  sum(a: number, b: number): Promise<number> {
+    throw new Error('BinaryCall proxy')
+    // or return null as any
   }
 }
-
-// Usage
-const client = new RustRPCClient('./target/release/my-server');
-const result = await client.call('add', [5, 10]);
-console.log(result); // 15
 ```
 
 ## Error Handling
