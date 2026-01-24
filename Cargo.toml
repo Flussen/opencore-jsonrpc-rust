@@ -9,7 +9,7 @@ repository = "https://github.com/Flussen/opencore-jsonrpc-rust"
 homepage = "https://opencorejs.dev"
 documentation = "https://opencorejs.dev/docs/decorators/server/binary-service"
 readme = "README.md"
-keywords = ["jsonrpc", "rpc", "ipc", "typescript", "binary", "opencore", "fivem", "redm"]
+keywords = ["jsonrpc", "rpc", "opencore", "fivem", "binary"]
 categories = ["network-programming", "encoding"]
 
 [dependencies]
