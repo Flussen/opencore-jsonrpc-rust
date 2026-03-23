@@ -8,6 +8,7 @@
 //! - Simple handler registration with type-safe function signatures
 //! - Line-delimited JSON protocol for easy integration
 //! - Automatic request/response serialization
+//! - Binary event emission compatible with `@BinaryEvent`
 //! - Clean error handling
 //!
 //! ## Quick Start
@@ -28,6 +29,9 @@
 //! fn main() {
 //!     let mut server = BinaryServer::new();
 //!     server.register("add", add);
+//!     server
+//!         .emit_event("worker.ready", serde_json::json!({ "pid": std::process::id() }))
+//!         .unwrap();
 //!     server.run();
 //! }
 //! ```
@@ -61,6 +65,16 @@
 //!   "status": "error",
 //!   "id": "unique-request-id",
 //!   "error": "error message"
+//! }
+//! ```
+//!
+//! ### Event Format
+//!
+//! ```json
+//! {
+//!   "type": "event",
+//!   "event": "worker.ready",
+//!   "data": {"pid": 1234}
 //! }
 //! ```
 

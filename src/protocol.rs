@@ -80,6 +80,30 @@ pub enum Response {
     },
 }
 
+/// An unsolicited event emitted by the binary process.
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct Event {
+    /// Discriminator used by OpenCore to route the message as an event.
+    #[serde(rename = "type")]
+    pub kind: String,
+    /// Event name matched against `@BinaryEvent` handlers.
+    pub event: String,
+    /// Optional JSON payload delivered to the handler.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<Value>,
+}
+
+impl Event {
+    /// Creates a new event message.
+    pub fn new(event: impl Into<String>, data: Option<Value>) -> Self {
+        Self {
+            kind: "event".to_string(),
+            event: event.into(),
+            data,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -158,5 +182,29 @@ mod tests {
 
         let cloned = response.clone();
         assert_eq!(response, cloned);
+    }
+
+    #[test]
+    fn test_event_serialization() {
+        let event = Event::new("worker.ready", Some(json!({"pid": 42})));
+
+        let json_str = serde_json::to_string(&event).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&json_str).unwrap();
+
+        assert_eq!(parsed["type"], "event");
+        assert_eq!(parsed["event"], "worker.ready");
+        assert_eq!(parsed["data"]["pid"], 42);
+    }
+
+    #[test]
+    fn test_event_without_data_serialization() {
+        let event = Event::new("heartbeat", None);
+
+        let json_str = serde_json::to_string(&event).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&json_str).unwrap();
+
+        assert_eq!(parsed["type"], "event");
+        assert_eq!(parsed["event"], "heartbeat");
+        assert!(parsed.get("data").is_none());
     }
 }

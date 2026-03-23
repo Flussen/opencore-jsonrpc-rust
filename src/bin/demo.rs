@@ -15,5 +15,11 @@ fn sum(params: Vec<Value>) -> Result<Value, String> {
 fn main() {
     let mut server = BinaryServer::new();
     server.register("sum", sum);
+    server
+        .emit_event(
+            "worker.ready",
+            serde_json::json!({ "pid": std::process::id() }),
+        )
+        .unwrap();
     server.run();
 }

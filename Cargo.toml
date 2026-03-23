@@ -1,7 +1,7 @@
 [package]
 name = "opencore-jsonrpc-rust"
-version = "0.1.0"
-edition = "2024"
+version = "1.0.0"
+edition = "2021"
 authors = ["Flussen"]
 description = "A simple and elegant library for creating JSON-RPC servers that communicate with the TypeScript framework OpenCore via stdin/stdout"
 license = "MIT"

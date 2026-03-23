@@ -1,6 +1,6 @@
 //! Integration tests for the JSON-RPC library
 
-use opencore_jsonrpc_rust::protocol::{Request, Response};
+use opencore_jsonrpc_rust::protocol::{Event, Request, Response};
 use opencore_jsonrpc_rust::server::BinaryServer;
 use serde_json::{json, Value};
 
@@ -160,4 +160,16 @@ fn test_error_handling_in_handlers() {
 
     assert!(json1.contains("multiply"));
     assert!(json2.contains("multiply"));
+}
+
+#[test]
+fn test_event_roundtrip() {
+    let event = Event::new("worker.ready", Some(json!({"pid": 99})));
+
+    let json = serde_json::to_string(&event).unwrap();
+    let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+
+    assert_eq!(parsed["type"], "event");
+    assert_eq!(parsed["event"], "worker.ready");
+    assert_eq!(parsed["data"]["pid"], 99);
 }

@@ -7,6 +7,7 @@ A simple and elegant library for creating JSON-RPC servers that communicate with
 - **Simple API** - Register handlers with a clean, type-safe interface
 - **Line-delimited JSON** - Easy integration with any language that can spawn processes
 - **Automatic serialization** - Request/response handling is transparent
+- **Binary events** - Emit messages that map to OpenCore `@BinaryEvent` listeners
 - **Robust error handling** - Clear error messages and graceful failure modes
 - **Well-tested** - Comprehensive unit and integration tests
 - **Fully documented** - Complete API documentation with examples
@@ -38,6 +39,9 @@ fn add(params: Vec<Value>) -> Result<Value, String> {
 fn main() {
     let mut server = BinaryServer::new();
     server.register("add", add);
+    server
+        .emit_event("worker.ready", serde_json::json!({ "pid": std::process::id() }))
+        .unwrap();
     server.run();
 }
 ```
@@ -66,6 +70,11 @@ Responses are written as line-delimited JSON to stdout:
 {"status": "error", "id": "req-123", "error": "Invalid parameters"}
 ```
 
+**Event:**
+```json
+{"type": "event", "event": "worker.ready", "data": {"pid": 1234}}
+```
+
 ## Examples
 
 ### Basic Math Operations
@@ -88,6 +97,13 @@ fn main() {
     server.register("multiply", multiply);
     server.run();
 }
+```
+
+### Emitting Events
+
+```rust
+let emitter = server.emitter();
+emitter.emit("worker.ready", serde_json::json!({ "pid": std::process::id() }))?;
 ```
 
 ### String Operations
@@ -175,6 +191,8 @@ The server automatically handles:
 - Unknown actions
 - Serialization errors
 - I/O errors
+
+Use `stdout` only for protocol traffic and write logs to `stderr`.
 
 ## Testing
 
